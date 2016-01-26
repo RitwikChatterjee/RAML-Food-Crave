@@ -4,49 +4,7 @@ version: v1
 baseUri: http://ritwik-dell-test.apigee.net/food-crave/{version}
 
 schemas:
-  - fbuser: |
-      {
-        "type" : "object",
-        "required": [
-            "response-status"
-        ],
-        "properties": {
-            "userDetails": {
-                "type": "object",
-                "required": [
-                    "name",
-                    "email"
-                ],
-                "properties": {
-                    "name": {
-                        "type": "string",
-                        "description": "user name"
-                    },
-                    "first_name": {
-                        "type": "string",
-                        "description": "user first name"
-                    },
-                    "location": {
-                        "type": "object",
-                        "properties": {
-                            "name": {
-                                "type": "string",
-                                "description": "location (if present) name as returned from Facebook"
-                            }
-                        }
-                    },
-                    "email": {
-                        "type": "string",
-                        "description": "user email id"
-                    }
-                }
-            },
-            "response-status": {
-                "$ref": "#/definitions/Response-status"
-            }
-        }
-      }
-  - restaurant-response: |
+  - collection-response: |
       type: "object"
       required: 
         - "response-status"
@@ -62,8 +20,19 @@ schemas:
           items: 
             $ref: <<resourcePathName|!singularize>>
         response-status: 
-          $ref: Response-status
+          $ref: response-status
 
+  - item-response: |
+      type: "object"
+      required: 
+        - "response-status"
+      properties: 
+        data: 
+          type: "array"
+          items: 
+            $ref: <<resourcePathName|!singularize>>
+        response-status: 
+          $ref: response-status
   - restaurant: |
       type: object
       properties:
@@ -201,27 +170,27 @@ resourceTypes:
             description: Response for successful request
             body:
               application/json:
-                schema: <<resourcePathName|!singularize>>-response
+                schema: collection-response
           400:
             description: Response for bad request
             body:
               application/json:
-                schema: <<resourcePathName|!singularize>>-response
+                schema: collection-response
           401:
             description: Response for unauthorized request
             body:
               application/json:
-                schema: <<resourcePathName|!singularize>>-response
+                schema: collection-response
           404:
             description: Response for resource not found
             body:
               application/json:
-                schema: <<resourcePathName|!singularize>>-response
+                schema: collection-response
           500:
             description: Response for internal error
             body:
               application/json:
-                schema: <<resourcePathName|!singularize>>-response
+                schema: collection-response
   - collection-item:
       description: Specific restaurant details
       
@@ -238,27 +207,27 @@ resourceTypes:
             description: Response for successful request
             body:
               application/json:
-                schema: <<resourcePathName|!singularize>>-response
+                schema: item-response
           400:
             description: Response for bad request
             body:
               application/json:
-                schema: <<resourcePathName|!singularize>>-response
+                schema: item-response
           401:
             description: Response for unauthorized request
             body:
               application/json:
-                schema: <<resourcePathName|!singularize>>-response
+                schema: item-response
           404:
             description: Response for resource not found
             body:
               application/json:
-                schema: <<resourcePathName|!singularize>>-response
+                schema: item-response
           500:
             description: Response for internal error
             body:
               application/json:
-                schema: <<resourcePathName|!singularize>>-response
+                schema: item-response
 
 traits:
   - pageable:
@@ -287,25 +256,6 @@ traits:
           required: false
           enum: <<sort-order>>
           default: desc          
-
-/fbusers/{uid}:
-  displayName: Facebook Users
-  description: Specific user details
-  
-  get:
-    description: Get a specific fbuser by Id
-    queryParameters:
-      accesstoken:
-        description: User access token to access user details
-        type: string
-        required: true
-      
-    responses:
-      200:
-        description: Facebook user profile information for the given user fetched from Facebook
-        body:
-          application/json:
-            schema: fbuser
 
 /restaurants:
   type: collection
