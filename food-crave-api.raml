@@ -50,7 +50,7 @@ schemas:
           description: restaurant mobile url
         location:
           description: Location of the restaurant
-          $ref: 'Location'
+          $ref: location
         is_closed:
           type: boolean
           description: Whether the business has been permanently closed
@@ -69,7 +69,7 @@ schemas:
         categories:
           type: array
           items:
-            $ref: 'Category'
+            $ref: category
 
   - category: |
       type: array
