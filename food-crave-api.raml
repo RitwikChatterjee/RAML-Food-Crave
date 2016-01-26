@@ -48,21 +48,21 @@ schemas:
       }
   - restaurant-response: |
       type: "object"
-      required:
+      required: 
         - "response-status"
-      properties:
-        page-size:
+      properties: 
+        page-size: 
           type: "number"
-        offset:
+        offset: 
           type: "number"
-        total-records:
+        total-records: 
           type: "number"
-        data:
+        data: 
           type: "array"
-          items:
-            $ref: "Restaurant"
-        response-status:
-          $ref: "Response-status"
+          items: 
+            $ref: <<resourcePathName|!singularize>>
+        response-status: 
+          $ref: Response-status
 
   - restaurant: |
       type: object
@@ -106,7 +106,7 @@ schemas:
       type: array
       items:
         type: string
-
+  
   - location: |
       type: object
       properties:
@@ -127,7 +127,7 @@ schemas:
             longitude:
               type: string
               description: longitude coordinates for the restaurant
-
+  
   - response-status: |
       type: object
       required:
@@ -144,15 +144,15 @@ schemas:
         http-code:
           type: integer
           description: HTTP-Code being returned
-          enum:
+          enum: 
             - 200
             - 400
             - 401
             - 404
-            - 500
+            - 500              
         error-block:
           $ref: 'error-block'
-
+  
   - error-block: |
       type: object
       properties:
@@ -182,10 +182,116 @@ schemas:
 
 
 
+resourceTypes:
+  - collection:
+      description: Collection of <<resourcePathName>> 
+      
+      get:
+        is:
+          - pageable
+        description: Collection of <<resourcePathName>> with the given search criteria
+        headers:
+          content-type:
+            description: Content-type in which communication needs to happen
+            required: true
+            type: string
+            enum: [application/json, application/xml]
+        responses:
+          200:
+            description: Response for successful request
+            body:
+              application/json:
+                schema: <<resourcePathName|!singularize>>-response
+          400:
+            description: Response for bad request
+            body:
+              application/json:
+                schema: <<resourcePathName|!singularize>>-response
+          401:
+            description: Response for unauthorized request
+            body:
+              application/json:
+                schema: <<resourcePathName|!singularize>>-response
+          404:
+            description: Response for resource not found
+            body:
+              application/json:
+                schema: <<resourcePathName|!singularize>>-response
+          500:
+            description: Response for internal error
+            body:
+              application/json:
+                schema: <<resourcePathName|!singularize>>-response
+  - collection-item:
+      description: Specific restaurant details
+      
+      get: 
+        description: Get a specific <<resourcePathName|!singularize>> by Id
+        headers:
+          content-type:
+            description: Content-type in which communication needs to happen
+            required: true
+            type: string
+            enum: [application/json, application/xml]
+        responses:
+          200:
+            description: Response for successful request
+            body:
+              application/json:
+                schema: <<resourcePathName|!singularize>>-response
+          400:
+            description: Response for bad request
+            body:
+              application/json:
+                schema: <<resourcePathName|!singularize>>-response
+          401:
+            description: Response for unauthorized request
+            body:
+              application/json:
+                schema: <<resourcePathName|!singularize>>-response
+          404:
+            description: Response for resource not found
+            body:
+              application/json:
+                schema: <<resourcePathName|!singularize>>-response
+          500:
+            description: Response for internal error
+            body:
+              application/json:
+                schema: <<resourcePathName|!singularize>>-response
+
+traits:
+  - pageable:
+      queryParameters:
+        offset:
+          description: To fetch the next set of results, offset the result-set by this amount
+          required: false
+          type: integer
+          minimum: 0
+          default: 0  
+        page-size:
+          description: Number of restaurant details (or size of resultset) desired
+          required: false
+          type: integer
+          minimum: 1
+          maximum: 15
+          default: 10
+  - sortable:
+      queryParameters:
+        order-by:
+          description: 'Order-by field. Should be one of: <<fieldsList>>'
+          required: false
+          type: string
+        order:
+          description: Sorting order
+          required: false
+          enum: <<sort-order>>
+          default: desc          
+
 /fbusers/{uid}:
   displayName: Facebook Users
   description: Specific user details
-
+  
   get:
     description: Get a specific fbuser by Id
     queryParameters:
@@ -193,7 +299,7 @@ schemas:
         description: User access token to access user details
         type: string
         required: true
-
+      
     responses:
       200:
         description: Facebook user profile information for the given user fetched from Facebook
@@ -202,10 +308,11 @@ schemas:
             schema: fbuser
 
 /restaurants:
-  description: Collection of restaurants
-
+  type: collection
+  
   get:
-    description: Collection of restaurants with the given search criteria
+    is:
+      - sortable: {fieldsList: "distance, ratings", sort-order: "desc, asc"}
     queryParameters:
       address:
         displayName: address
@@ -216,19 +323,6 @@ schemas:
         description: The food/cuisine preference of the user
         required: false
         type: string
-      page-size:
-        description: Number of restaurant details (or size of resultset) desired
-        required: false
-        type: integer
-        minimum: 1
-        maximum: 15
-        default: 10
-      offset:
-        description: 'To fetch the next set of results, offset the result-set by this amount'
-        required: false
-        type: integer
-        minimum: 0
-        default: 0
       distance:
         description: The radial distance in kilometers (KMs) from the location from where to fetch the restaurants for
         required: false
@@ -236,74 +330,12 @@ schemas:
         minimum: 1
         maximum: 40
         default: 40
-    headers:
-      content-type:
-        description: Content-type in which communication needs to happen
-        required: true
-        type: string
-        enum: [application/json, application/xml]
     responses:
-      200:
-        description: Response for successful request
-        body:
-          application/json:
-            schema: restaurant-response
-      400:
-        description: Response for bad request
-        body:
-          application/json:
-            schema: restaurant-response
-      401:
-        description: Response for unauthorized request
-        body:
-          application/json:
-            schema: restaurant-response
-      404:
-        description: Response for resource not found
-        body:
-          application/json:
-            schema: restaurant-response
-      500:
-        description: Response for internal error
-        body:
-          application/json:
-            schema: restaurant-response
 
 
-/restaurants/{id}:
-  description: Specific restaurant details
+  /{restaurantId}:
+    type: collection-item
+    get:
+      responses:
 
-  get:
-    description: Get a specific restaurant by Id
-    headers:
-      content-type:
-        description: Content-type in which communication needs to happen
-        required: true
-        type: string
-        enum: [application/json, application/xml]
-    responses:
-      200:
-        description: Response for successful request
-        body:
-          application/json:
-            schema: restaurant-response
-      400:
-        description: Response for bad request
-        body:
-          application/json:
-            schema: restaurant-response
-      401:
-        description: Response for unauthorized request
-        body:
-          application/json:
-            schema: restaurant-response
-      404:
-        description: Response for resource not found
-        body:
-          application/json:
-            schema: restaurant-response
-      500:
-        description: Response for internal error
-        body:
-          application/json:
-            schema: restaurant-response
+    
