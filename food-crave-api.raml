@@ -33,122 +33,20 @@ schemas:
             $ref: <<resourcePathName|!singularize>>
         response-status: 
           $ref: response-status
-  - restaurant: |
-      type: object
-      properties:
-        name:
-          type: string
-          description: Restaurant name
-        id:
-          type: string
-          description: Restaurant id
-        url:
-          type: string
-          description: restaurant  url
-        mobile_url:
-          type: string
-          description: restaurant mobile url
-        location:
-          description: Location of the restaurant
-          $ref: location
-        is_closed:
-          type: boolean
-          description: Whether the business has been permanently closed
-        display_phone:
-          type: string
-          description: restaurant phone number formatted for display
-        rating:
-          type: number
-          description: restaurant review ratings on Yelp
-        review_count:
-          type: number
-          description: number of reviews on Yelp
-        rating_img_url:
-          type: string
-          description: URL to star rating image for this restaurant
-        categories:
-          type: array
-          items:
-            $ref: category
+  - restaurant: !include food-crave-restaurant.schema
 
   - category: |
       type: array
       items:
         type: string
   
-  - location: |
-      type: object
-      properties:
-        display_address:
-          type: array
-          description: Address of the restaurant
-          items:
-            type: string
-        geo-accuracy:
-          type: string
-          description: accuracy of the coordinates provided
-        coordinate:
-          type: object
-          properties:
-            latitude:
-              type: string
-              description: latitude coordinates for the restaurant
-            longitude:
-              type: string
-              description: longitude coordinates for the restaurant
+  - location: !include food-crave-location.schema
   
-  - response-status: |
-      type: object
-      required:
-        - status
-        - http-code
-      properties:
-        status:
-          type: string
-          description: Status of the request.
-          enum:
-            - success
-            - success with warnings
-            - failure
-        http-code:
-          type: integer
-          description: HTTP-Code being returned
-          enum: 
-            - 200
-            - 400
-            - 401
-            - 404
-            - 500              
-        error-block:
-          $ref: 'error-block'
+  - response-status: !include response-status.schema
   
-  - error-block: |
-      type: object
-      properties:
-        errors:
-          type: array
-          items:
-            $ref: 'error'
-  - error: |
-      type: object
-      required:
-        - error-code
-        - error-message
-        - error-details
-      properties:
-        error-code:
-          type: string
-          description: The particular error-code being returned
-        error-message:
-          type: string
-          description: Short error-message
-        error-details:
-          type: string
-          description: Detailed error-message
-        help-url:
-          type: string
-          description: URL for additional resources
+  - error-block: !include response-status-error-block.schema
 
+  - error: !include response-status-error.schema
 
 
 resourceTypes:
